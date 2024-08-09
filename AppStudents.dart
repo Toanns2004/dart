@@ -45,8 +45,8 @@ void main()async{
         1. Thêm sinh viên 
         2. Hiển thị thông tin sinh viên 
         3. Sửa thông tin sinh viên 
-        4. Xóa sinh viên 
-        5. Thoát 
+        4. Tìm kiếm sinh viên theo  ID
+        5. Hiển thị sinh viên có điểm thi môn cao nhất
         Mời bạn chọn:
         ''');
     String? choice = stdin.readLineSync();
@@ -163,14 +163,6 @@ Future<void> editStudent(String filePath, List<Student> studentList) async {
       return;
     }
 
-    String jsonString = await File(filePath).readAsString();
-
-    // Chuyển đổi chuỗi JSON thành danh sách sinh viên
-    List<dynamic> jsonList = jsonDecode(jsonString);
-    List<Student> studentList = jsonList.map((json) => Student.fromJson(json)).toList();
-
-
-    // Tìm sinh viên theo ID
     for(var student in studentList){
       if(student.id == id){
         if (student == null) {
@@ -185,7 +177,6 @@ Future<void> editStudent(String filePath, List<Student> studentList) async {
           student.name = newName;
         }
 
-        // Chỉnh sửa thông tin môn học
         for (int i = 0; i < student.subjects.length; i++) {
           print('Môn học ${i + 1}: ${student.subjects[i].name}');
           print('Bạn muốn chỉnh sửa môn học này? (y/n):');
@@ -216,7 +207,6 @@ Future<void> editStudent(String filePath, List<Student> studentList) async {
       }
     }
 
-    // Lưu thay đổi vào file
     await saveStudents(filePath, studentList);
     print('Cập nhật thông tin sinh viên thành công');
   } catch (e) {
@@ -233,12 +223,6 @@ Future<void> searchStudent(String filePath, List<Student> studentList) async {
     print('ID không hợp lệ');
     return;
   }
-
-  String jsonString = await File(filePath).readAsString();
-
-  // Chuyển đổi chuỗi JSON thành danh sách sinh viên
-  List<dynamic> jsonList = jsonDecode(jsonString);
-  List<Student> studentList = jsonList.map((json) => Student.fromJson(json)).toList();
 
   // Tìm sinh viên theo ID
   for(var student in studentList){
@@ -260,34 +244,31 @@ Future<void> searchStudent(String filePath, List<Student> studentList) async {
 
 }
 
-// Future<void> displayStudentMaxScore(String filePath, List<Student> studentList) async {
-//   if (studentList.isEmpty) {
-//     print('Danh sách sinh viên trống');
-//     return;
-//   }
-//
-//   String jsonString = await File(filePath).readAsString();
-//
-//   // Chuyển đổi chuỗi JSON thành danh sách sinh viên
-//   List<dynamic> jsonList = jsonDecode(jsonString);
-//   List<Student> studentList = jsonList.map((json) => Student.fromJson(json)).toList();
-//
-//   for()
-//   Student? topStudent = studentList.reduce((current, next) {
-//     int currentMaxScore = current.subjects.fold(0, (sum, subject) => sum + subject.scores.fold(0, (s, score) => s + score));
-//     int nextMaxScore = next.subjects.fold(0, (sum, subject) => sum + subject.scores.fold(0, (s, score) => s + score));
-//
-//     return currentMaxScore > nextMaxScore ? current : next;
-//   });
-//
-//   print('Sinh viên có điểm cao nhất:');
-//   print('ID: ${topStudent.id}');
-//   print('Tên: ${topStudent.name}');
-//   // Hiển thị thông tin môn học và điểm số của sinh viên điểm cao nhất nếu cần
-//   for (var subject in topStudent.subjects) {
-//     print('Môn học: ${subject.name}');
-//     print('Điểm: ${subject.scores}');
-//   }
-// }
+Future<void> displayStudentMaxScore(String filePath,List<Student> studentList) async {
+  try {
 
+    if (studentList.isEmpty) {
+      print('Danh sách sinh viên trống');
+      return;
+    }
 
+    // Tìm sinh viên có điểm cao nhất
+    Student topStudent = studentList.reduce((current, next) {
+      int currentMaxScore = current.subjects.fold(0, (sum, subject) => sum + subject.scores.fold(0, (s, score) => s + score));
+      int nextMaxScore = next.subjects.fold(0, (sum, subject) => sum + subject.scores.fold(0, (s, score) => s + score));
+
+      return currentMaxScore > nextMaxScore ? current : next;
+    });
+
+    // Hiển thị thông tin sinh viên có điểm cao nhất
+    print('Sinh viên có điểm cao nhất:');
+    print('ID: ${topStudent.id}');
+    print('Tên: ${topStudent.name}');
+    for (var subject in topStudent.subjects) {
+      print('Môn học: ${subject.name}');
+      print('Điểm: ${subject.scores}');
+    }
+  } catch (e) {
+    print('Đã xảy ra lỗi: $e');
+  }
+}

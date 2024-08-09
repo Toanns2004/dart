@@ -244,30 +244,39 @@ Future<void> searchStudent(String filePath, List<Student> studentList) async {
 
 }
 
-Future<void> displayStudentMaxScore(String filePath,List<Student> studentList) async {
+Future<void> displayStudentMaxScore(String filePath, List<Student> studentList) async {
   try {
-
     if (studentList.isEmpty) {
       print('Danh sách sinh viên trống');
       return;
     }
 
+    // Biến lưu trữ sinh viên có điểm số cao nhất và điểm số cao nhất
+    Student? topStudent;
+    int highestScore = -1;
+
     // Tìm sinh viên có điểm cao nhất
-    Student topStudent = studentList.reduce((current, next) {
-      int currentMaxScore = current.subjects.fold(0, (sum, subject) => sum + subject.scores.fold(0, (s, score) => s + score));
-      int nextMaxScore = next.subjects.fold(0, (sum, subject) => sum + subject.scores.fold(0, (s, score) => s + score));
-
-      return currentMaxScore > nextMaxScore ? current : next;
-    });
-
-    // Hiển thị thông tin sinh viên có điểm cao nhất
-    print('Sinh viên có điểm cao nhất:');
-    print('ID: ${topStudent.id}');
-    print('Tên: ${topStudent.name}');
-    for (var subject in topStudent.subjects) {
-      print('Môn học: ${subject.name}');
-      print('Điểm: ${subject.scores}');
+    for (var student in studentList) {
+      for (var subject in student.subjects) {
+        for (var score in subject.scores) {
+          if (score.score > highestScore) {
+            highestScore = score.score;
+            topStudent = student;
+          }
+        }
+      }
     }
+
+    if (topStudent == null) {
+      print('Không tìm thấy sinh viên có điểm số');
+    } else {
+      // Hiển thị thông tin sinh viên có điểm cao nhất
+      print('Sinh viên có điểm cao nhất:');
+      print('ID: ${topStudent.id}');
+      print('Tên: ${topStudent.name}');
+      print('Điểm cao nhất: $highestScore');
+    }
+
   } catch (e) {
     print('Đã xảy ra lỗi: $e');
   }

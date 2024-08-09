@@ -154,7 +154,7 @@ Future<void> addStudent(String filePath, List<Student> studentList) async {
 
 Future<void> editStudent(String filePath, List<Student> studentList) async {
   try {
-    print('Nhập ID sinh viên cần sửa:');
+    print('Nhập ID sinh viên cần tìm:');
     String? idInput = stdin.readLineSync();
     int? id = int.tryParse(idInput ?? '');
 
@@ -163,49 +163,56 @@ Future<void> editStudent(String filePath, List<Student> studentList) async {
       return;
     }
 
+    String jsonString = await File(filePath).readAsString();
+
+    // Chuyển đổi chuỗi JSON thành danh sách sinh viên
+    List<dynamic> jsonList = jsonDecode(jsonString);
+    List<Student> studentList = jsonList.map((json) => Student.fromJson(json)).toList();
+
+
     // Tìm sinh viên theo ID
-    Student? student = studentList.firstWhere(
-          (student) => student.id == id,
-      orElse: () => null,
-    );
-
-    if (student == null) {
-      print('Không tìm thấy sinh viên với ID này');
-      return;
-    }
-
-    // Chỉnh sửa tên sinh viên
-    print('Nhập tên mới (để trống nếu không thay đổi):');
-    String? newName = stdin.readLineSync();
-    if (newName != null && newName.isNotEmpty) {
-      student.name = newName;
-    }
-
-    // Chỉnh sửa thông tin môn học
-    for (int i = 0; i < student.subjects.length; i++) {
-      print('Môn học ${i + 1}: ${student.subjects[i].name}');
-      print('Bạn muốn chỉnh sửa môn học này? (y/n):');
-      String? editChoice = stdin.readLineSync();
-
-      if (editChoice != null && editChoice.toLowerCase() == 'y') {
-        // Chỉnh sửa tên môn học
-        print('Nhập tên môn học mới (để trống nếu không thay đổi):');
-        String? newSubjectName = stdin.readLineSync();
-        if (newSubjectName != null && newSubjectName.isNotEmpty) {
-          student.subjects[i].name = newSubjectName;
+    for(var student in studentList){
+      if(student.id == id){
+        if (student == null) {
+          print('Không tìm thấy sinh viên với ID này');
+          return;
         }
 
-        // Chỉnh sửa điểm số cho môn học
-        for (int j = 0; j < student.subjects[i].scores.length; j++) {
-          print('Điểm ${j + 1} hiện tại: ${student.subjects[i].scores[j]}');
-          print('Nhập điểm mới (để trống nếu không thay đổi):');
-          String? newScoreInput = stdin.readLineSync();
-          int? newScore = int.tryParse(newScoreInput ?? '');
-
-          if (newScore != null) {
-            student.subjects[i].scores[j] = newScore as Score;
-          }
+        // Chỉnh sửa tên sinh viên
+        print('Nhập tên mới (để trống nếu không thay đổi):');
+        String? newName = stdin.readLineSync();
+        if (newName != null && newName.isNotEmpty) {
+          student.name = newName;
         }
+
+        // Chỉnh sửa thông tin môn học
+        for (int i = 0; i < student.subjects.length; i++) {
+          print('Môn học ${i + 1}: ${student.subjects[i].name}');
+          print('Bạn muốn chỉnh sửa môn học này? (y/n):');
+          String? editChoice = stdin.readLineSync();
+
+          if (editChoice != null && editChoice.toLowerCase() == 'y') {
+            // Chỉnh sửa tên môn học
+            print('Nhập tên môn học mới (để trống nếu không thay đổi):');
+            String? newSubjectName = stdin.readLineSync();
+            if (newSubjectName != null && newSubjectName.isNotEmpty) {
+              student.subjects[i].name = newSubjectName;
+            }
+
+            // Chỉnh sửa điểm số cho môn học
+            for (int j = 0; j < student.subjects[i].scores.length; j++) {
+              print('Điểm ${j + 1} hiện tại: ${student.subjects[i].scores[j]}');
+              print('Nhập điểm mới (để trống nếu không thay đổi):');
+              String? newScoreInput = stdin.readLineSync();
+              int? newScore = int.tryParse(newScoreInput ?? '');
+
+              if (newScore != null) {
+                student.subjects[i].scores[j] = newScore as Score;
+              }
+            }
+      }
+    }
+
       }
     }
 
@@ -227,23 +234,30 @@ Future<void> searchStudent(String filePath, List<Student> studentList) async {
     return;
   }
 
-  Student? student = studentList.firstWhere(
-        (student) => student.id == id,
-    orElse: () => null,
-  );
+  String jsonString = await File(filePath).readAsString();
 
-  if (student.id == -1) {
-    print('Không tìm thấy sinh viên với ID này');
-  } else {
-    print('Thông tin sinh viên:');
-    print('ID: ${student.id}');
-    print('Tên: ${student.name}');
-    // Hiển thị thông tin môn học nếu cần
-    for (var subject in student.subjects) {
-      print('Môn học: ${subject.name}');
-      print('Điểm: ${subject.scores}');
+  // Chuyển đổi chuỗi JSON thành danh sách sinh viên
+  List<dynamic> jsonList = jsonDecode(jsonString);
+  List<Student> studentList = jsonList.map((json) => Student.fromJson(json)).toList();
+
+  // Tìm sinh viên theo ID
+  for(var student in studentList){
+    if(student.id == id){
+      if (student.id == -1) {
+        print('Không tìm thấy sinh viên với ID này');
+      } else {
+        print('Thông tin sinh viên:');
+        print('ID: ${student.id}');
+        print('Tên: ${student.name}');
+        // Hiển thị thông tin môn học nếu cần
+        for (var subject in student.subjects) {
+          print('Môn học: ${subject.name}');
+          print('Điểm: ${subject.scores}');
+        }
+      }
     }
   }
+
 }
 
 // Future<void> displayStudentMaxScore(String filePath, List<Student> studentList) async {
@@ -252,6 +266,13 @@ Future<void> searchStudent(String filePath, List<Student> studentList) async {
 //     return;
 //   }
 //
+//   String jsonString = await File(filePath).readAsString();
+//
+//   // Chuyển đổi chuỗi JSON thành danh sách sinh viên
+//   List<dynamic> jsonList = jsonDecode(jsonString);
+//   List<Student> studentList = jsonList.map((json) => Student.fromJson(json)).toList();
+//
+//   for()
 //   Student? topStudent = studentList.reduce((current, next) {
 //     int currentMaxScore = current.subjects.fold(0, (sum, subject) => sum + subject.scores.fold(0, (s, score) => s + score));
 //     int nextMaxScore = next.subjects.fold(0, (sum, subject) => sum + subject.scores.fold(0, (s, score) => s + score));
@@ -269,38 +290,4 @@ Future<void> searchStudent(String filePath, List<Student> studentList) async {
 //   }
 // }
 
-Future<void> searchStudent(String filePath, int searchId) async {
-  try {
-    // Đọc nội dung file JSON
-    String jsonString = await File(filePath).readAsString();
 
-    // Chuyển đổi chuỗi JSON thành danh sách sinh viên
-    List<dynamic> jsonList = jsonDecode(jsonString);
-    List<Student> studentList = jsonList.map((json) => Student.fromJson(json)).toList();
-
-    print('Nhập ID sinh viên cần tìm:');
-    String? idInput = stdin.readLineSync();
-    int? id = int.tryParse(idInput ?? '');
-    // Tìm sinh viên theo ID
-    for(var student in studentList){
-      if(student.id == id){
-
-      }
-    }
-
-    // Hiển thị thông tin sinh viên
-    if (student.id == -1) {
-      print('Không tìm thấy sinh viên với ID này');
-    } else {
-      print('Thông tin sinh viên:');
-      print('ID: ${student.id}');
-      print('Tên: ${student.name}');
-      for (var subject in student.subjects) {
-        print('Môn học: ${subject.name}');
-        print('Điểm: ${subject.scores}');
-      }
-    }
-  } catch (e) {
-    print('Đã xảy ra lỗi: $e');
-  }
-}

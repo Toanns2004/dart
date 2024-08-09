@@ -64,9 +64,9 @@ void main()async{
       case '4':
         await searchStudent(filePath, studentList);
         break;
-      // case '5'
-      //   await displayStudentMaxSocer(filePath, studentList);
-      //   break;
+      case '5'
+        await displayStudentMaxScore(filePath, studentList);
+        break;
       case '6':
         print('Thoát chương trình');
         exit(0);
@@ -245,7 +245,7 @@ Future<void> searchStudent(String filePath, List<Student> studentList) async {
 }
 
 Future<void> displayStudentMaxScore(String filePath, List<Student> studentList) async {
-  try {
+
     if (studentList.isEmpty) {
       print('Danh sách sinh viên trống');
       return;
@@ -277,7 +277,4 @@ Future<void> displayStudentMaxScore(String filePath, List<Student> studentList) 
       print('Điểm cao nhất: $highestScore');
     }
 
-  } catch (e) {
-    print('Đã xảy ra lỗi: $e');
-  }
 }
